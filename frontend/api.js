@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5001/api";
+const BASE_URL = "https://bont-fixture-app.onrender.com/api";
 
 // ----------------- FIXTURES -----------------
 export const getFixtures = async () => {
