@@ -13,7 +13,12 @@ console.log("MONGO_URI =", process.env.MONGO_URI);
 
 app.use(
   cors({
-    origin: ["https://bontrfc.netlify.app/"],
+    origin: [
+      "http://localhost:5173", // local dev
+      "https://bontrfc.netlify.app", // deployed frontend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 
