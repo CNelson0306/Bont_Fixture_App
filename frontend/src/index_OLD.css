@@ -1,0 +1,683 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* LANDING SCREEN */
+
+.landing-container {
+  min-height: 100vh;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.logo {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 20px;
+}
+
+.subheading {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 60px;
+}
+
+.button {
+  background-color: #ffbf00;
+  padding: 15px 30px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.button:hover {
+  transform: scale(1.05);
+}
+
+.admin-button {
+  background-color: #111;
+  border: 2px solid #ffbf00;
+  color: #ffbf00;
+  font-size: 16px;
+}
+
+/* RESULTS SCREEN */
+.results-container {
+  background-color: black;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.top-back-button {
+  padding: 16px;
+  background-color: black;
+  border: none;
+  cursor: pointer;
+  color: #ffbf00;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.result-card {
+  background-color: #ffbf00;
+  padding: 16px;
+  text-align: center;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.result-date {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: black;
+}
+
+.teams-row,
+.scores-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.team-text,
+.score {
+  font-weight: bold;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.scores-row .score {
+  margin: 0 15px;
+}
+
+.mom-text {
+  font-style: italic;
+  color: black;
+  font-size: 14px;
+}
+
+/* FIXTURE SCREEN */
+.fixture-container {
+  min-height: 100vh;
+  background-color: black;
+  padding: 16px;
+}
+
+.top-back-button {
+  padding: 16px;
+  background-color: black;
+  border: none;
+  cursor: pointer;
+  color: #ffbf00;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.fixture-list {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 16px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.fixture-item {
+  padding: 16px;
+  background-color: #ffbf00;
+  border-radius: 12px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.date-text {
+  color: black;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.team-text {
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0px;
+}
+
+.venue-text {
+  color: black;
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* ADD FIXTURE SCREEN */
+.add-fixture-container {
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.input {
+  background-color: #111;
+  border: 1px solid #ffbf00;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.button {
+  background-color: #ffbf00;
+  color: #000;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.back-button {
+  background-color: #111;
+  border: 2px solid #ffbf00;
+  color: #ffbf00;
+}
+
+/* ADD RESULT SCREEN */
+.result-container {
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.input {
+  background-color: #111;
+  border: 1px solid #ffbf00;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  width: 80%;
+  color: #fff;
+  font-size: 16px;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+.save-button {
+  background-color: #ffbf00;
+  padding: 15px 30px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  width: 80%;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.go-back-button {
+}
+
+/* ADMIN HOME SCREEN */
+.admin-container {
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 40px;
+}
+
+.button {
+  background-color: #ffbf00;
+  padding: 15px 30px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  width: 80%;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.logout-button {
+  background-color: #111;
+  border: 2px solid #ffbf00;
+  color: #ffbf00;
+}
+
+/* EDIT FIXTURES SCREEN */
+.edit-fixture-container {
+  padding: 20px;
+  background-color: black;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-size: 22px;
+  color: #ffbf00;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.input {
+  background-color: #222;
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  max-width: 400px;
+}
+
+.update-button {
+  background-color: #ffbf00;
+  padding: 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.update-button:hover {
+  opacity: 0.9;
+}
+
+.delete-button {
+  background-color: black;
+  border: 2px solid #ffbf00;
+  color: #ffbf00;
+  padding: 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.delete-button:hover {
+  background-color: #111;
+}
+
+.loading {
+  color: #ffbf00;
+  font-size: 18px;
+}
+
+/* EDIT RESULTS SCREEN */
+.edit-result-container {
+  padding: 20px;
+  background-color: black;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.heading {
+  font-size: 22px;
+  color: #ffbf00;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.input {
+  background-color: #222;
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  border: none;
+  width: 100%;
+  max-width: 400px;
+}
+
+.update-button {
+  background-color: #ffbf00;
+  padding: 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.update-button:hover {
+  opacity: 0.9;
+}
+
+.delete-button {
+  background-color: black;
+  border: 2px solid #ffbf00;
+  color: #ffbf00;
+  padding: 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.delete-button:hover {
+  background-color: #111;
+}
+
+/* LOGIN SCREEN */
+.login-container {
+  background-color: #000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 40px;
+}
+
+.input {
+  width: 80%;
+  max-width: 400px;
+  background-color: #111;
+  color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ffbf00;
+  font-size: 16px;
+}
+
+.show-button {
+  background: none;
+  border: none;
+  color: #ffbf00;
+  font-weight: bold;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.show-button:hover {
+  text-decoration: underline;
+}
+
+.login-button {
+  background-color: #ffbf00;
+  padding: 15px 30px;
+  border-radius: 12px;
+  width: 80%;
+  max-width: 400px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.login-button:hover {
+  opacity: 0.9;
+}
+
+.go-back-button {
+  background-color: #000;
+  padding: 15px 30px;
+  border-radius: 12px;
+  margin-top: 1rem;
+  width: 80%;
+  max-width: 400px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffbf00;
+  border: solid 2px #ffbf00;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* MANAGE FIXTURE SCREEN */
+.manage-container {
+  background-color: #000;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.fixture-card {
+  background-color: #ffbf00;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.date {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.teams {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.venue {
+  font-size: 14px;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.edit-btn,
+.delete-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+}
+
+.edit-btn {
+  background-color: #000;
+  color: white;
+  margin-right: 8px;
+}
+
+.delete-btn {
+  background-color: red;
+  color: white;
+  margin-left: 8px;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+  opacity: 0.85;
+}
+
+/* MANAGE RESULTS SCREEN */
+.results-container {
+  background-color: black;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.heading {
+  color: #ffbf00;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.result-card {
+  background-color: #ffbf00;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.date {
+  color: black;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 10px;
+}
+
+.team,
+.score {
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.mom {
+  color: black;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.edit-btn,
+.delete-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+}
+
+.edit-btn {
+  background-color: black;
+  color: white;
+  margin-right: 8px;
+}
+
+.delete-btn {
+  background-color: red;
+  color: white;
+  margin-left: 8px;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+  opacity: 0.85;
+}

@@ -1,0 +1,282 @@
+/* =========================
+   GLOBAL STYLES & VARIABLES
+   ========================= */
+:root {
+  --color-primary: #ffbf00;
+  --color-secondary: #111;
+  --color-bg: #000;
+  --color-text: #fff;
+  --color-danger: red;
+
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --font-lg: 18px;
+  --font-md: 16px;
+  --font-sm: 14px;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 3px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: var(--color-bg);
+}
+
+/* =========================
+   REUSABLE COMPONENTS
+   ========================= */
+.title {
+  font-weight: bold;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+.logo {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+.subheading {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffbf00;
+  margin-bottom: 60px;
+}
+
+.input {
+  background-color: var(--color-secondary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  color: var(--color-text);
+  font-size: var(--font-md);
+  margin-bottom: 1rem;
+  width: 80%;
+  max-width: 400px;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+.button {
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+  padding: 14px 28px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-lg);
+  font-weight: bold;
+  cursor: pointer;
+  width: 80%;
+  max-width: 400px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, opacity 0.2s ease;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.button.secondary {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.button.danger {
+  background-color: var(--color-danger);
+  color: var(--color-text);
+}
+
+.button.edit {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.actions button {
+  width: 150px;
+}
+
+/* =========================
+   LAYOUTS
+   ========================= */
+.container {
+  min-height: 100vh;
+  padding: 20px;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.manage-container {
+  padding: 2rem;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   SPECIAL CASES
+   ========================= */
+.show-button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: bold;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.show-button:hover {
+  text-decoration: underline;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-bg);
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* FIXTURE SCREEN */
+.fixture-container {
+  min-height: 100vh;
+  background-color: black;
+  padding: 16px;
+}
+.top-back-button {
+  padding: 16px;
+  background-color: black;
+  border: none;
+  cursor: pointer;
+  color: #ffbf00;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.fixture-list {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 16px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.fixture-item {
+  padding: 16px;
+  background-color: #ffbf00;
+  border-radius: 12px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.date-text {
+  color: black;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.team-text {
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0px;
+}
+
+.venue-text {
+  color: black;
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* RESULTS SCREEN */
+.results-container {
+  background-color: black;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.result-card {
+  background-color: #ffbf00;
+  padding: 16px;
+  text-align: center;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.result-date {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: black;
+}
+
+.teams-row,
+.scores-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.team-text,
+.score {
+  font-weight: bold;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.scores-row .score {
+  margin: 0 15px;
+}
+
+.mom-text {
+  font-style: italic;
+  color: black;
+  font-size: 14px;
+}
+
+/* MANAGE FIXTURES SCREEN */
+.manage-fixtures {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 4rem;
+}
