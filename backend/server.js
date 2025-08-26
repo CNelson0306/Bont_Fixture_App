@@ -11,6 +11,7 @@ const app = express();
 
 console.log("MONGO_URI =", process.env.MONGO_URI);
 
+// Keep local host for testing
 app.use(
   cors({
     origin: [
