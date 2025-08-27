@@ -46,6 +46,7 @@ export default function AddFixtureScreen() {
         className="input"
         value={date}
         onChange={(e) => setDate(e.target.value)}
+        placeholder="Select Date:"
       />
 
       {/* Inputs */}
