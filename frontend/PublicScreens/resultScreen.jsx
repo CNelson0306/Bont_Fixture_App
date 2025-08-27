@@ -10,7 +10,7 @@ export default function ResultScreen() {
   const parseDate = (str) => {
     if (!str) return new Date(0); // put undated results at the start
     const [day, month, year] = str.split("/").map(Number);
-    return new Date(2000 + year, month - 1, day);
+    return new Date(day, month - 1, 2000 + year);
   };
 
   const sortResults = (results) =>
@@ -18,7 +18,7 @@ export default function ResultScreen() {
 
   useEffect(() => {
     getResults().then((data) => {
-      console.log("Results from API:", data);
+      console.log("Results from backend", data);
       setResults(sortResults(data));
     });
   }, []);
@@ -46,6 +46,20 @@ export default function ResultScreen() {
               <span className="score">{item.homeScore}</span>
               <span className="score">{item.awayScore}</span>
             </div>
+
+            {/* ✅ Scorers List */}
+            {item.scorers && item.scorers.length > 0 && (
+              <div className="scorers">
+                <h4>Point Scorers</h4>
+                <ul>
+                  {item.scorers.map((scorer, index) => (
+                    <li key={index}>
+                      {scorer.name} - {scorer.points}pts
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="mom-text">Man of the match - {item.manOfMatch}</div>
           </div>

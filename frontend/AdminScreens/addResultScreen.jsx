@@ -9,8 +9,17 @@ export default function AddResultScreen() {
   const [fixture, setFixture] = useState("");
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
+  const [scorersText, setScorersText] = useState("");
   const [manOfMatch, setManOfMatch] = useState("");
   const [date, setDate] = useState("");
+
+  const scorers = scorersText
+    .split("\n") // split by new line
+    .map((line) => {
+      const [name, points] = line.split("-").map((s) => s.trim());
+      return { name, points: Number(points) || 0 };
+    })
+    .filter((s) => s.name);
 
   const handleSave = async () => {
     if (!fixture || !homeScore || !awayScore || !manOfMatch || !date) {
@@ -24,6 +33,7 @@ export default function AddResultScreen() {
       awayScore: Number(awayScore),
       manOfMatch,
       date,
+      scorers,
     };
 
     const response = await addResult(result);
@@ -34,6 +44,7 @@ export default function AddResultScreen() {
       setAwayScore("");
       setManOfMatch("");
       setDate("");
+      setScorersText("");
     } else {
       alert("Could not save result.");
     }
@@ -74,6 +85,15 @@ export default function AddResultScreen() {
         placeholder="Away Score"
         value={awayScore}
         onChange={(e) => setAwayScore(e.target.value)}
+      />
+
+      {/* POINTS SCORERS */}
+      <textarea
+        className="input"
+        rows="5"
+        placeholder="Points Scorers - Enter one per line"
+        value={scorersText}
+        onChange={(e) => setScorersText(e.target.value)}
       />
 
       {/* MOTM */}
