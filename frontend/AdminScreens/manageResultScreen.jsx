@@ -67,6 +67,26 @@ export default function ManageResultsScreen() {
               <p className="score">{item.awayScore}</p>
             </div>
 
+            {/* ✅ Scorers List */}
+            {item.scorers && item.scorers.length > 0 ? (
+              <div className="manage-scorers">
+                <h4>Point Scorers</h4>
+                <ul
+                  style={{ listStyle: "none", paddingLeft: 0, marginLeft: 0 }}
+                >
+                  {item.scorers
+                    .sort((a, b) => b.points - a.points)
+                    .map((scorer, index) => (
+                      <li key={index}>
+                        {scorer.name} - {scorer.points} pts
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ) : (
+              <p>No scorers recorded</p>
+            )}
+
             {/* Man of the Match */}
             <p className="mom-text">Man of the Match - {item.manOfMatch}</p>
 

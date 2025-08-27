@@ -21,6 +21,12 @@ export default function AddResultScreen() {
     })
     .filter((s) => s.name);
 
+  let formattedDate = date;
+  if (date.includes("-")) {
+    const [year, month, day] = date.split("-");
+    formattedDate = `${day}/${month}/${year.slice(-2)}`;
+  }
+
   const handleSave = async () => {
     if (!fixture || !homeScore || !awayScore || !manOfMatch || !date) {
       alert("All fields (including Date) are required!");
@@ -32,7 +38,7 @@ export default function AddResultScreen() {
       homeScore: Number(homeScore),
       awayScore: Number(awayScore),
       manOfMatch,
-      date,
+      date: formattedDate,
       scorers,
     };
 

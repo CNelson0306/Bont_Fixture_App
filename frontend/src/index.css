@@ -235,7 +235,6 @@ body {
 .result-card {
   background-color: #ffbf00;
   padding: 16px;
-  text-align: center;
   border-radius: 12px;
   margin-bottom: 16px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
@@ -243,6 +242,7 @@ body {
 
 .result-date {
   font-weight: bold;
+  text-align: center;
   margin-bottom: 6px;
   color: black;
 }
@@ -266,10 +266,28 @@ body {
   margin: 0 15px;
 }
 
+.scorers h4 {
+  margin-top: 3rem;
+  margin-left: 1.2rem;
+  text-transform: uppercase;
+  text-align: left;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.scorers li {
+  line-height: 2rem;
+  letter-spacing: 0.1rem;
+  list-style: none;
+  text-align: left;
+}
+
 .mom-text {
   font-style: italic;
   color: black;
   font-size: 14px;
+  margin-left: 0rem;
+  margin-top: 2rem;
 }
 
 /* MANAGE FIXTURES SCREEN */
@@ -280,4 +298,19 @@ body {
   align-items: center;
   padding: 1rem;
   margin-bottom: 4rem;
+}
+
+/* MANAGE RESULTS SCREEN */
+.manage-scorers h4 {
+  margin-top: 3rem;
+  margin-left: 0rem;
+  text-transform: uppercase;
+  text-align: left;
+  font-weight: 400;
+}
+
+.manage-scorers li {
+  list-style: none;
+  text-align: left;
+  margin-left: 0rem;
 }

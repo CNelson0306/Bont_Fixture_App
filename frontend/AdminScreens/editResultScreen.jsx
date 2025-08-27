@@ -13,6 +13,7 @@ export default function EditResultScreen() {
     awayScore: "",
     manOfMatch: "",
     date: "",
+    scorers: "",
   });
 
   useEffect(() => {
@@ -21,12 +22,18 @@ export default function EditResultScreen() {
         const data = await getResultById(resultId);
         if (!data) throw new Error("Result not found");
 
+        // ✅ convert scorers array -> textarea string
+        const scorersText = (data.scorers || [])
+          .map((s) => `${s.name} - ${s.points}`)
+          .join("\n");
+
         setResult({
           fixture: data.fixture || "",
           homeScore: data.homeScore?.toString() || "",
           awayScore: data.awayScore?.toString() || "",
           manOfMatch: data.manOfMatch || "",
           date: data.date || "",
+          scorersText,
         });
       } catch (err) {
         console.error("Error loading result:", err);
@@ -44,6 +51,16 @@ export default function EditResultScreen() {
       return;
     }
 
+    // ✅ convert textarea back to array
+    const scorers = result.scorersText
+      .trim()
+      .split("\n")
+      .map((line) => {
+        const [name, points] = line.split("-").map((s) => s.trim());
+        return { name, points: Number(points) || 0 };
+      })
+      .filter((s) => s.name);
+
     try {
       await updateResult(resultId, {
         fixture: result.fixture,
@@ -51,6 +68,7 @@ export default function EditResultScreen() {
         awayScore: Number(result.awayScore),
         manOfMatch: result.manOfMatch,
         date: result.date,
+        scorers,
       });
 
       alert("Result updated successfully!");
@@ -85,7 +103,7 @@ export default function EditResultScreen() {
 
         <input
           className="input"
-          type="text"
+          type="date"
           value={result.date}
           onChange={(e) => setResult({ ...result, date: e.target.value })}
           placeholder="Date (DD/MM/YY)"
@@ -113,6 +131,16 @@ export default function EditResultScreen() {
           value={result.awayScore}
           onChange={(e) => setResult({ ...result, awayScore: e.target.value })}
           placeholder="Away Score"
+        />
+
+        <textarea
+          className="input"
+          rows="5"
+          value={result.scorersText}
+          onChange={(e) =>
+            setResult({ ...result, scorersText: e.target.value })
+          }
+          placeholder="Points Scorers - Enter one per line."
         />
 
         <input
