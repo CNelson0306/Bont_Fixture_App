@@ -175,8 +175,8 @@ body {
 .fixture-container {
   min-height: 100vh;
   background-color: black;
-  padding: 4rem;
-  padding-top: 4rem;
+  padding: 2rem;
+  padding-top: 5rem;
 }
 .top-back-button {
   position: fixed;
@@ -235,7 +235,7 @@ body {
   min-height: 100vh;
   background-color: black;
   padding: 4rem;
-  padding-top: 4rem;
+  padding-top: 5rem;
 }
 
 .result-card {
