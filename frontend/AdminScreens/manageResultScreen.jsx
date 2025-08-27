@@ -7,6 +7,24 @@ export default function ManageResultsScreen() {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
+
+    let day, month, year;
+
+    // if it's ISO format "yyyy-mm-dd"
+    if (dateStr.includes("-")) {
+      [year, month, day] = dateStr.split("-");
+    }
+    // if it's already "dd/mm/yy"
+    else if (dateStr.includes("/")) {
+      [day, month, year] = dateStr.split("/");
+      if (year.length === 4) year = year.slice(-2);
+    }
+
+    return `${day}/${month}/${year}`;
+  };
+
   const parseDate = (str) => {
     if (!str) return new Date(0);
     const [day, month, year] = str.split("/").map(Number);
@@ -53,7 +71,7 @@ export default function ManageResultsScreen() {
         return (
           <div key={item._id} className="result-card">
             {/* Date */}
-            <p className="result-date">{item.date || "Date N/A"}</p>
+            <p className="result-date">{formatDate(item.date) || "Date N/A"}</p>
 
             {/* Teams */}
             <div className="teams-row">

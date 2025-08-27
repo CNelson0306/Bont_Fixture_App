@@ -175,9 +175,13 @@ body {
 .fixture-container {
   min-height: 100vh;
   background-color: black;
-  padding: 16px;
+  padding: 4rem;
+  padding-top: 4rem;
 }
 .top-back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
   padding: 16px;
   background-color: black;
   border: none;
@@ -185,6 +189,7 @@ body {
   color: #ffbf00;
   font-weight: bold;
   font-size: 18px;
+  z-index: 1000;
 }
 
 .fixture-list {
@@ -227,9 +232,10 @@ body {
 
 /* RESULTS SCREEN */
 .results-container {
-  background-color: black;
   min-height: 100vh;
-  padding: 20px;
+  background-color: black;
+  padding: 4rem;
+  padding-top: 4rem;
 }
 
 .result-card {
@@ -266,20 +272,27 @@ body {
   margin: 0 15px;
 }
 
+.scorers {
+  text-align: center; /* makes all children centered */
+  margin-top: 2rem;
+}
+
 .scorers h4 {
-  margin-top: 3rem;
-  margin-left: 1.2rem;
+  margin: 0 0 1rem 0; /* remove left margin, add spacing below */
   text-transform: uppercase;
-  text-align: left;
   font-weight: 400;
   font-style: italic;
+}
+
+.scorers ul {
+  padding: 0;
+  margin: 0;
 }
 
 .scorers li {
   line-height: 2rem;
   letter-spacing: 0.1rem;
   list-style: none;
-  text-align: left;
 }
 
 .mom-text {

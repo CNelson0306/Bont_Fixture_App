@@ -21,16 +21,20 @@ export default function AddResultScreen() {
     })
     .filter((s) => s.name);
 
-  let formattedDate = date;
-  if (date.includes("-")) {
-    const [year, month, day] = date.split("-");
-    formattedDate = `${day}/${month}/${year.slice(-2)}`;
-  }
-
   const handleSave = async () => {
     if (!fixture || !homeScore || !awayScore || !manOfMatch || !date) {
       alert("All fields (including Date) are required!");
       return;
+    }
+
+    let formattedDate = "Date not available";
+
+    if (date) {
+      const parts = date.split("-"); // "yyyy-mm-dd"
+      if (parts.length === 3) {
+        const [year, month, day] = parts;
+        formattedDate = `${day}/${month}/${year.slice(-2)}`;
+      }
     }
 
     const result = {

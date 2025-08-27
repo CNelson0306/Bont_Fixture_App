@@ -28,6 +28,7 @@ export default function FixtureScreen() {
       </button>
 
       <div className="fixture-list">
+        <h2 className="title">Bont U14's Fixtures</h2>
         {fixtures.map((item) => (
           <div key={item._id} className="fixture-item">
             <p className="date-text">{item.date}</p>

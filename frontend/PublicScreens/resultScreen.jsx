@@ -7,6 +7,24 @@ export default function ResultScreen() {
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
+
+    let day, month, year;
+
+    // if it's ISO format "yyyy-mm-dd"
+    if (dateStr.includes("-")) {
+      [year, month, day] = dateStr.split("-");
+    }
+    // if it's already "dd/mm/yy"
+    else if (dateStr.includes("/")) {
+      [day, month, year] = dateStr.split("/");
+      if (year.length === 4) year = year.slice(-2);
+    }
+
+    return `${day}/${month}/${year}`;
+  };
+
   const parseDate = (str) => {
     if (!str) return new Date(0); // put undated results at the start
     const [day, month, year] = str.split("/").map(Number);
@@ -28,14 +46,12 @@ export default function ResultScreen() {
       <button className="top-back-button" onClick={() => navigate(-1)}>
         ◀ Back
       </button>
-
+      <h2 className="title">Team Results</h2>
       {results.map((item) => {
         const [homeTeam, awayTeam] = item.fixture.split(" vs ");
         return (
           <div key={item._id} className="result-card">
-            <div className="result-date">
-              {item.date ? item.date : "Date not available"}
-            </div>
+            <div className="result-date">{formatDate(item.date)}</div>
 
             <div className="teams-row">
               <span className="team-text">{homeTeam}</span>
