@@ -68,9 +68,9 @@ export default function AddResultScreen() {
       <input
         type="date"
         className="input"
+        placeholder="Select Date:"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        placeholder="Select Date:"
       />
 
       {/* Fixture Name */}
