@@ -8,14 +8,29 @@ export default function FixtureScreen() {
   const navigate = useNavigate();
   const [fixtures, setFixtures] = useState([]);
 
+  // --- Helpers ---
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
+    let day, month, year;
+    if (dateStr.includes("-")) {
+      // ISO format YYYY-MM-DD
+      [year, month, day] = dateStr.split("-");
+    } else if (dateStr.includes("/")) {
+      // Already in dd/mm/yy
+      [day, month, year] = dateStr.split("/");
+      if (year.length === 4) year = year.slice(-2);
+    }
+    return `${day}/${month}/${year}`;
+  };
+
   const parseDate = (str) => {
+    if (!str) return new Date(0);
     const [day, month, year] = str.split("/").map(Number);
     return new Date(2000 + year, month - 1, day);
   };
 
-  const sortFixtures = (fixtures) => {
-    return [...fixtures].sort((a, b) => parseDate(a.date) - parseDate(b.date));
-  };
+  const sortFixtures = (fixtures) =>
+    [...fixtures].sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
   useEffect(() => {
     const loadFixtures = async () => {
@@ -37,7 +52,7 @@ export default function FixtureScreen() {
 
     loadFixtures();
 
-    // Optional: update automatically when back online
+    // Automatically sync when back online
     const handleOnline = async () => {
       try {
         const latest = await getFixtures();
@@ -62,10 +77,10 @@ export default function FixtureScreen() {
         <h2 className="title">Bont U14's Fixtures</h2>
         {fixtures.map((item) => (
           <div key={item._id} className="fixture-item">
-            <p className="date-text">{item.date}</p>
+            <p className="date-text">{formatDate(item.date)}</p>
             <p className="team-text">
-              {item.home} {item.homeScore ? item.homeScore : ""} vs{" "}
-              {item.awayScore ? item.awayScore : ""} {item.away}
+              {item.home} {item.homeScore ?? ""} vs {item.awayScore ?? ""}{" "}
+              {item.away}
             </p>
             <p className="venue-text">{item.venue}</p>
           </div>

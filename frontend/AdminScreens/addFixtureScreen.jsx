@@ -12,21 +12,31 @@ export default function AddFixtureScreen() {
   const [venue, setVenue] = useState("");
   const [date, setDate] = useState("");
 
+  // Helper to format YYYY-MM-DD -> dd/mm/yy
+  const formatDate = (isoDate) => {
+    if (!isoDate) return "Date not available";
+    const [year, month, day] = isoDate.split("-");
+    return `${day}/${month}/${year.slice(-2)}`;
+  };
+
+  // Helper to sort fixtures by date
+  const sortFixtures = (fixtures) =>
+    fixtures.sort((a, b) => {
+      const [dayA, monthA, yearA] = a.date.split("/").map(Number);
+      const [dayB, monthB, yearB] = b.date.split("/").map(Number);
+      return (
+        new Date(2000 + yearA, monthA - 1, dayA) -
+        new Date(2000 + yearB, monthB - 1, dayB)
+      );
+    });
+
   const handleSave = async () => {
     if (!homeTeam || !awayTeam || !venue || !date) {
       alert("All fields (including Date) are required!");
       return;
     }
 
-    // Format date to dd/mm/yy
-    let formattedDate = "Date not available";
-    if (date) {
-      const parts = date.split("-"); // YYYY-MM-DD
-      if (parts.length === 3) {
-        const [year, month, day] = parts;
-        formattedDate = `${day}/${month}/${year.slice(-2)}`;
-      }
-    }
+    const formattedDate = formatDate(date);
 
     const fixturePayload = {
       home: homeTeam,
@@ -35,21 +45,31 @@ export default function AddFixtureScreen() {
       date: formattedDate,
     };
 
-    const response = await addFixture(fixturePayload);
+    try {
+      const response = await addFixture(fixturePayload);
 
-    if (response) {
-      alert("Fixture saved!");
+      if (response) {
+        alert("Fixture saved!");
 
-      // Update cached fixtures for offline
-      const cached = (await localforage.getItem("fixtures")) || [];
-      await localforage.setItem("fixtures", [...cached, fixturePayload]);
+        // 1️⃣ Update offline cache immediately
+        const cached = (await localforage.getItem("fixtures")) || [];
+        const updatedFixtures = sortFixtures([...cached, fixturePayload]);
+        await localforage.setItem("fixtures", updatedFixtures);
 
-      setHomeTeam("");
-      setAwayTeam("");
-      setVenue("");
-      setDate("");
-    } else {
-      alert("Error: Could not save fixture.");
+        // 2️⃣ Reset form
+        setHomeTeam("");
+        setAwayTeam("");
+        setVenue("");
+        setDate("");
+
+        // Optional: navigate back to FixtureScreen
+        navigate(-1);
+      } else {
+        alert("Error: Could not save fixture.");
+      }
+    } catch (err) {
+      console.error("Error saving fixture:", err);
+      alert("Error saving fixture. Try again.");
     }
   };
 
