@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import localforage from "localforage";
 import { addResult } from "../api";
 import "../src/index.css";
 
@@ -13,13 +14,28 @@ export default function AddResultScreen() {
   const [manOfMatch, setManOfMatch] = useState("");
   const [date, setDate] = useState("");
 
-  const scorers = scorersText
-    .split("\n") // split by new line
-    .map((line) => {
-      const [name, points] = line.split("-").map((s) => s.trim());
-      return { name, points: Number(points) || 0 };
-    })
-    .filter((s) => s.name);
+  // Sync queued results automatically when online
+  useEffect(() => {
+    const syncQueuedResults = async () => {
+      if (navigator.onLine) {
+        const queued = (await localforage.getItem("queuedResults")) || [];
+        for (let result of queued) {
+          try {
+            await addResult(result);
+          } catch (err) {
+            console.error("Failed to sync result:", result, err);
+          }
+        }
+        // Clear queue if all synced
+        await localforage.setItem("queuedResults", []);
+      }
+    };
+
+    window.addEventListener("online", syncQueuedResults);
+    syncQueuedResults(); // try sync immediately if online
+
+    return () => window.removeEventListener("online", syncQueuedResults);
+  }, []);
 
   const handleSave = async () => {
     if (!fixture || !homeScore || !awayScore || !manOfMatch || !date) {
@@ -27,10 +43,17 @@ export default function AddResultScreen() {
       return;
     }
 
-    let formattedDate = "Date not available";
+    const scorers = scorersText
+      .split("\n")
+      .map((line) => {
+        const [name, points] = line.split("-").map((s) => s.trim());
+        return { name, points: Number(points) || 0 };
+      })
+      .filter((s) => s.name);
 
+    let formattedDate = "Date not available";
     if (date) {
-      const parts = date.split("-"); // "yyyy-mm-dd"
+      const parts = date.split("-");
       if (parts.length === 3) {
         const [year, month, day] = parts;
         formattedDate = `${day}/${month}/${year.slice(-2)}`;
@@ -46,17 +69,31 @@ export default function AddResultScreen() {
       scorers,
     };
 
-    const response = await addResult(result);
-    if (response) {
-      alert("Result saved!");
+    try {
+      if (navigator.onLine) {
+        // If online, save directly
+        await addResult(result);
+        alert("Result saved online!");
+      } else {
+        // If offline, queue locally
+        const queued = (await localforage.getItem("queuedResults")) || [];
+        queued.push(result);
+        await localforage.setItem("queuedResults", queued);
+        alert(
+          "No internet. Result queued and will sync automatically when online."
+        );
+      }
+
+      // Reset form
       setFixture("");
       setHomeScore("");
       setAwayScore("");
       setManOfMatch("");
       setDate("");
       setScorersText("");
-    } else {
-      alert("Could not save result.");
+    } catch (err) {
+      console.error("Error saving result:", err);
+      alert("Failed to save result.");
     }
   };
 
@@ -73,7 +110,7 @@ export default function AddResultScreen() {
         onChange={(e) => setDate(e.target.value)}
       />
 
-      {/* Fixture Name */}
+      {/* Fixture */}
       <input
         type="text"
         className="input"
@@ -98,7 +135,7 @@ export default function AddResultScreen() {
         onChange={(e) => setAwayScore(e.target.value)}
       />
 
-      {/* POINTS SCORERS */}
+      {/* Scorers */}
       <textarea
         className="input"
         rows="5"
@@ -120,7 +157,6 @@ export default function AddResultScreen() {
       <button className="button primary" onClick={handleSave}>
         Save Result
       </button>
-
       <button className="button secondary" onClick={() => navigate(-1)}>
         Back
       </button>

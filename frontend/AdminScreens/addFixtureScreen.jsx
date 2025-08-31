@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addFixture } from "../api";
+import localforage from "localforage";
 import "../src/index.css";
 
 export default function AddFixtureScreen() {
@@ -17,16 +18,32 @@ export default function AddFixtureScreen() {
       return;
     }
 
+    // Format date to dd/mm/yy
+    let formattedDate = "Date not available";
+    if (date) {
+      const parts = date.split("-"); // YYYY-MM-DD
+      if (parts.length === 3) {
+        const [year, month, day] = parts;
+        formattedDate = `${day}/${month}/${year.slice(-2)}`;
+      }
+    }
+
     const fixturePayload = {
       home: homeTeam,
       away: awayTeam,
       venue,
-      date, // already in YYYY-MM-DD format from input[type=date]
+      date: formattedDate,
     };
 
     const response = await addFixture(fixturePayload);
+
     if (response) {
       alert("Fixture saved!");
+
+      // Update cached fixtures for offline
+      const cached = (await localforage.getItem("fixtures")) || [];
+      await localforage.setItem("fixtures", [...cached, fixturePayload]);
+
       setHomeTeam("");
       setAwayTeam("");
       setVenue("");
@@ -44,7 +61,6 @@ export default function AddFixtureScreen() {
       <input
         type="date"
         className="input"
-        placeholder="Select Date:"
         value={date}
         onChange={(e) => setDate(e.target.value)}
       />
@@ -76,7 +92,6 @@ export default function AddFixtureScreen() {
       <button className="button primary" onClick={handleSave}>
         Save Fixture
       </button>
-
       <button className="button secondary" onClick={() => navigate(-1)}>
         Back
       </button>
