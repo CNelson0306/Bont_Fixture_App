@@ -8,32 +8,45 @@ export default function ResultScreen() {
   const navigate = useNavigate();
   const [results, setResults] = useState([]);
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Date not available";
-    let day, month, year;
-    if (dateStr.includes("-")) [year, month, day] = dateStr.split("-");
-    else if (dateStr.includes("/")) [day, month, year] = dateStr.split("/");
-    if (year.length === 4) year = year.slice(-2);
-    return `${day}/${month}/${year}`;
-  };
-
+  // ✅ Safely parse both "YYYY-MM-DD" and "DD/MM/YY" or "DD/MM/YYYY"
   const parseDate = (str) => {
     if (!str) return new Date(0);
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(day, month - 1, 2000 + year);
+
+    // ISO style (yyyy-mm-dd)
+    if (str.includes("-")) {
+      return new Date(str);
+    }
+
+    // European style (dd/mm/yy or dd/mm/yyyy)
+    const [day, month, yearRaw] = str.split("/").map(Number);
+    const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw;
+    return new Date(year, month - 1, day);
   };
 
+  // ✅ Consistent date display (e.g. "27/10/25")
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
+    const date = parseDate(dateStr);
+    if (isNaN(date)) return "Invalid date";
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
+
+  // ✅ Sort results newest → oldest
   const sortResults = (results) =>
-    [...results].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+    [...results].sort((a, b) => parseDate(b.date) - parseDate(a.date));
 
   useEffect(() => {
     const loadResults = async () => {
       try {
-        // 1️⃣ Load cached results first
+        // Load cached results first
         const cached = await localforage.getItem("results");
         if (cached) setResults(sortResults(cached));
 
-        // 2️⃣ Fetch latest from backend
+        // Fetch latest from backend
         if (navigator.onLine) {
           const latest = await getResults();
           setResults(sortResults(latest));
@@ -46,7 +59,7 @@ export default function ResultScreen() {
 
     loadResults();
 
-    // Optional: automatically update when back online
+    // Auto-refresh when back online
     const handleOnline = async () => {
       try {
         const latest = await getResults();

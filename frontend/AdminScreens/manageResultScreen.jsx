@@ -7,32 +7,36 @@ export default function ManageResultsScreen() {
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Date not available";
-
-    let day, month, year;
-
-    // if it's ISO format "yyyy-mm-dd"
-    if (dateStr.includes("-")) {
-      [year, month, day] = dateStr.split("-");
-    }
-    // if it's already "dd/mm/yy"
-    else if (dateStr.includes("/")) {
-      [day, month, year] = dateStr.split("/");
-      if (year.length === 4) year = year.slice(-2);
-    }
-
-    return `${day}/${month}/${year}`;
-  };
-
+  // ✅ Handles both "YYYY-MM-DD" and "DD/MM/YY" or "DD/MM/YYYY"
   const parseDate = (str) => {
     if (!str) return new Date(0);
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(2000 + year, month - 1, day);
+
+    // ISO style (yyyy-mm-dd)
+    if (str.includes("-")) {
+      return new Date(str);
+    }
+
+    // European style (dd/mm/yy or dd/mm/yyyy)
+    const [day, month, yearRaw] = str.split("/").map(Number);
+    const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw;
+    return new Date(year, month - 1, day);
   };
 
+  // ✅ Formats for display
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "Date not available";
+    const date = parseDate(dateStr);
+    if (isNaN(date)) return "Invalid date";
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
+
+  // ✅ Sort newest → oldest
   const sortResults = (results) =>
-    [...results].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+    [...results].sort((a, b) => parseDate(b.date) - parseDate(a.date));
 
   const loadResults = async () => {
     try {
@@ -85,7 +89,7 @@ export default function ManageResultsScreen() {
               <p className="score">{item.awayScore}</p>
             </div>
 
-            {/* ✅ Scorers List */}
+            {/* Scorers */}
             {item.scorers && item.scorers.length > 0 ? (
               <div className="manage-scorers">
                 <h4>Point Scorers</h4>
