@@ -1,5 +1,17 @@
 const BASE_URL = "https://bont-fixture-app.onrender.com/api";
 
+// Silently wake up the Render server as early as possible.
+export const warmServer = () => {
+  if (!navigator.onLine) return;
+  fetch(`${BASE_URL}/fixtures`, { method: "HEAD" }).catch(() => {});
+};
+
+// Fetch fixtures AND results in one round-trip.
+export const getAllData = async () => {
+  const [fixtures, results] = await Promise.all([getFixtures(), getResults()]);
+  return { fixtures, results };
+};
+
 // ----------------- FIXTURES -----------------
 export const getFixtures = async () => {
   try {
@@ -55,9 +67,7 @@ export const updateFixture = async (id, fixture) => {
 
 export const deleteFixture = async (id) => {
   try {
-    const res = await fetch(`${BASE_URL}/fixtures/${id}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`${BASE_URL}/fixtures/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete fixture");
     return await res.json();
   } catch (error) {
@@ -121,13 +131,49 @@ export const updateResult = async (id, result) => {
 
 export const deleteResult = async (id) => {
   try {
-    const res = await fetch(`${BASE_URL}/results/${id}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`${BASE_URL}/results/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete result");
     return await res.json();
   } catch (error) {
     console.error("deleteResult error:", error);
+    return null;
+  }
+};
+
+// ----------------- ARCHIVES -----------------
+export const getArchives = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/archives`);
+    if (!res.ok) throw new Error("Failed to fetch archives");
+    return await res.json();
+  } catch (error) {
+    console.error("getArchives error:", error);
+    return [];
+  }
+};
+
+export const saveArchive = async (archive) => {
+  try {
+    const res = await fetch(`${BASE_URL}/archives`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(archive),
+    });
+    if (!res.ok) throw new Error("Failed to save archive");
+    return await res.json();
+  } catch (error) {
+    console.error("saveArchive error:", error);
+    return null;
+  }
+};
+
+export const deleteArchive = async (id) => {
+  try {
+    const res = await fetch(`${BASE_URL}/archives/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to delete archive");
+    return await res.json();
+  } catch (error) {
+    console.error("deleteArchive error:", error);
     return null;
   }
 };

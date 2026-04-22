@@ -1,91 +1,151 @@
+// src/pages/FixtureScreen.jsx
 import React, { useEffect, useState } from "react";
 import localforage from "localforage";
 import { getFixtures } from "../api";
 import { useNavigate } from "react-router-dom";
-import "../src/index.css";
+
+// ─── helpers ───────────────────────────────────────────────────────────────
+
+const parseDate = (str) => {
+  if (!str) return new Date(0);
+  if (str.includes("-")) {
+    // ISO: YYYY-MM-DD
+    return new Date(str);
+  }
+  // European: DD/MM/YY or DD/MM/YYYY
+  const [day, month, yearRaw] = str.split("/").map(Number);
+  const year = yearRaw < 100 ? 2000 + yearRaw : yearRaw;
+  return new Date(year, month - 1, day);
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "TBC";
+  const d = parseDate(dateStr);
+  if (isNaN(d)) return "TBC";
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "2-digit",
+  });
+};
+
+const sortFixtures = (list) =>
+  [...list].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+// Split "Team A vs Team B" safely, falling back to the raw string.
+const splitTeams = (fixture = "") => {
+  const parts = fixture.split(" vs ");
+  return parts.length >= 2
+    ? [parts[0].trim(), parts.slice(1).join(" vs ").trim()]
+    : [fixture, ""];
+};
+
+// ─── component ─────────────────────────────────────────────────────────────
 
 export default function FixtureScreen() {
   const navigate = useNavigate();
   const [fixtures, setFixtures] = useState([]);
-
-  // --- Helpers ---
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "Date not available";
-    let day, month, year;
-    if (dateStr.includes("-")) {
-      // ISO format YYYY-MM-DD
-      [year, month, day] = dateStr.split("-");
-    } else if (dateStr.includes("/")) {
-      // Already in dd/mm/yy
-      [day, month, year] = dateStr.split("/");
-      if (year.length === 4) year = year.slice(-2);
-    }
-    return `${day}/${month}/${year}`;
-  };
-
-  const parseDate = (str) => {
-    if (!str) return new Date(0);
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(2000 + year, month - 1, day);
-  };
-
-  const sortFixtures = (fixtures) =>
-    [...fixtures].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadFixtures = async () => {
-      try {
-        // 1️⃣ Load cached fixtures first
-        const cached = await localforage.getItem("fixtures");
-        if (cached) setFixtures(sortFixtures(cached));
+    let cancelled = false;
 
-        // 2️⃣ Fetch latest from backend if online
-        if (navigator.onLine) {
+    const load = async () => {
+      // 1. Show cached data immediately — feels instant.
+      const cached = await localforage.getItem("fixtures");
+      if (cached && !cancelled) {
+        setFixtures(sortFixtures(cached));
+        setLoading(false);
+      }
+
+      // 2. Fetch fresh data in the background.
+      if (navigator.onLine) {
+        try {
           const latest = await getFixtures();
-          setFixtures(sortFixtures(latest));
-          await localforage.setItem("fixtures", latest); // update cache
+          if (!cancelled) {
+            setFixtures(sortFixtures(latest));
+            setLoading(false);
+            await localforage.setItem("fixtures", latest);
+          }
+        } catch (err) {
+          console.error("Error loading fixtures:", err);
+          if (!cancelled) setLoading(false);
         }
-      } catch (err) {
-        console.error("Error loading fixtures:", err);
+      } else {
+        if (!cancelled) setLoading(false);
       }
     };
 
-    loadFixtures();
+    load();
 
-    // Automatically sync when back online
     const handleOnline = async () => {
       try {
         const latest = await getFixtures();
-        setFixtures(sortFixtures(latest));
-        await localforage.setItem("fixtures", latest);
+        if (!cancelled) {
+          setFixtures(sortFixtures(latest));
+          await localforage.setItem("fixtures", latest);
+        }
       } catch (err) {
         console.error("Error syncing fixtures:", err);
       }
     };
 
     window.addEventListener("online", handleOnline);
-    return () => window.removeEventListener("online", handleOnline);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("online", handleOnline);
+    };
   }, []);
 
   return (
-    <div className="fixture-container">
-      <button className="top-back-button" onClick={() => navigate(-1)}>
-        ◀ Back
-      </button>
+    <div className="page">
+      <header className="page__header">
+        <button className="page__back" onClick={() => navigate(-1)}>
+          Back
+        </button>
+        <h1 className="page__title">Fixtures</h1>
+        <div className="page__title-spacer" />
+      </header>
 
-      <div className="fixture-list">
-        <h2 className="title">Bont U14's Fixtures</h2>
-        {fixtures.map((item) => (
-          <div key={item._id} className="fixture-item">
-            <p className="date-text">{formatDate(item.date)}</p>
-            <p className="team-text">
-              {item.home} {item.homeScore ?? ""} vs {item.awayScore ?? ""}{" "}
-              {item.away}
-            </p>
-            <p className="venue-text">{item.venue}</p>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <div className="loading-pulse">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="skeleton skeleton--card" />
+          ))}
+        </div>
+      ) : fixtures.length === 0 ? (
+        <p className="state-message">No fixtures scheduled yet.</p>
+      ) : (
+        <div className="page__body">
+          {fixtures.map((item) => {
+            const [home, away] = item.fixture
+              ? splitTeams(item.fixture)
+              : [item.home, item.away];
+
+            return (
+              <div key={item._id} className="fixture-card">
+                <div className="fixture-card__meta">
+                  <span className="fixture-card__date">
+                    {formatDate(item.date)}
+                  </span>
+                  {item.venue && (
+                    <span className="fixture-card__venue">{item.venue}</span>
+                  )}
+                </div>
+                <div className="fixture-card__teams">
+                  <span className="fixture-card__team">
+                    {home || item.home || "—"}
+                  </span>
+                  <span className="fixture-card__vs">vs</span>
+                  <span className="fixture-card__team fixture-card__team--away">
+                    {away || item.away || "—"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

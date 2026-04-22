@@ -1,78 +1,137 @@
+// src/pages/ManageFixtureScreen.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getFixtures, deleteFixture } from "../api"; // adjust path if needed
-import "../src/index.css";
+import { getFixtures, deleteFixture } from "../api";
+
+const parseDate = (str) => {
+  if (!str) return new Date(0);
+  if (str.includes("-")) return new Date(str);
+  const [day, month, yearRaw] = str.split("/").map(Number);
+  return new Date(2000 + yearRaw, month - 1, day);
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "TBC";
+  const d = parseDate(dateStr);
+  if (isNaN(d)) return "TBC";
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "2-digit",
+  });
+};
+
+const sortFixtures = (list) =>
+  [...list].sort((a, b) => parseDate(a.date) - parseDate(b.date));
 
 export default function ManageFixtureScreen() {
-  const [fixtures, setFixtures] = useState([]);
   const navigate = useNavigate();
-
-  // Parse DD/MM/YY to Date
-  const parseDate = (str) => {
-    const [day, month, year] = str.split("/").map(Number);
-    return new Date(2000 + year, month - 1, day);
-  };
-
-  // Sort fixtures earliest first
-  const sortFixtures = (fixtures) =>
-    [...fixtures].sort((a, b) => parseDate(a.date) - parseDate(b.date));
-
-  const loadFixtures = async () => {
-    try {
-      const data = await getFixtures();
-      setFixtures(sortFixtures(data));
-    } catch (error) {
-      console.error("Error fetching fixtures:", error);
-    }
-  };
+  const [fixtures, setFixtures] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(null); // id of fixture pending delete
+  const [deleting, setDeleting] = useState(null); // id currently being deleted
 
   useEffect(() => {
-    loadFixtures();
+    const load = async () => {
+      try {
+        const data = await getFixtures();
+        setFixtures(sortFixtures(data));
+      } catch (err) {
+        console.error("Error fetching fixtures:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this fixture?")) {
-      try {
-        await deleteFixture(id);
-        setFixtures((prev) => sortFixtures(prev.filter((f) => f._id !== id)));
-      } catch (err) {
-        console.error("Delete failed", err);
-      }
+  const handleDeleteRequest = (id) => {
+    setConfirmDelete(id);
+    // auto-cancel after 4s
+    setTimeout(
+      () => setConfirmDelete((cur) => (cur === id ? null : cur)),
+      4000,
+    );
+  };
+
+  const handleDeleteConfirm = async (id) => {
+    setDeleting(id);
+    try {
+      await deleteFixture(id);
+      setFixtures((prev) => sortFixtures(prev.filter((f) => f._id !== id)));
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setDeleting(null);
+      setConfirmDelete(null);
     }
   };
 
   return (
-    <div className="fixture-container">
-      <button className="top-back-button" onClick={() => navigate(-1)}>
-        ◀ Back
-      </button>
-      <div className="manage-fixtures">
-        <h2 className="title">Manage Fixtures</h2>
-        {fixtures.map((item) => (
-          <div key={item._id} className="card">
-            <p className="date-text">{item.date}</p>
-            <p className="team-text">
-              {item.home} vs {item.away}
-            </p>
-            <p className="venue-text">@ {item.venue}</p>
+    <div className="page">
+      <header className="page__header">
+        <button className="page__back" onClick={() => navigate(-1)}>
+          Back
+        </button>
+        <h1 className="page__title">Manage Fixtures</h1>
+        <div className="page__title-spacer" />
+      </header>
 
-            <div className="actions">
-              <button
-                className="button edit"
-                onClick={() => navigate(`/edit-fixtures/${item._id}`)}
-              >
-                Edit
-              </button>
-              <button
-                className="button danger"
-                onClick={() => handleDelete(item._id)}
-              >
-                Delete
-              </button>
+      {loading ? (
+        <div className="loading-pulse">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="skeleton skeleton--card" />
+          ))}
+        </div>
+      ) : fixtures.length === 0 ? (
+        <p className="state-message">No fixtures to manage.</p>
+      ) : (
+        <div className="page__body">
+          {fixtures.map((item) => (
+            <div key={item._id} className="manage-card">
+              <div className="manage-card__meta">
+                <span className="fixture-card__date">
+                  {formatDate(item.date)}
+                </span>
+                {item.venue && (
+                  <span className="fixture-card__venue">{item.venue}</span>
+                )}
+              </div>
+              <div className="fixture-card__teams">
+                <span className="fixture-card__team">{item.home}</span>
+                <span className="fixture-card__vs">vs</span>
+                <span className="fixture-card__team fixture-card__team--away">
+                  {item.away}
+                </span>
+              </div>
+              <div className="manage-card__actions">
+                <button
+                  className="btn manage-card__btn-edit"
+                  onClick={() => navigate(`/edit-fixtures/${item._id}`)}
+                >
+                  Edit
+                </button>
+                {confirmDelete === item._id ? (
+                  <button
+                    className="btn manage-card__btn-delete manage-card__btn-delete--confirm"
+                    onClick={() => handleDeleteConfirm(item._id)}
+                    disabled={deleting === item._id}
+                  >
+                    {deleting === item._id ? "Deleting…" : "Confirm delete"}
+                  </button>
+                ) : (
+                  <button
+                    className="btn manage-card__btn-delete"
+                    onClick={() => handleDeleteRequest(item._id)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

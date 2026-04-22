@@ -36,11 +36,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT
+// PUT — runValidators: false prevents Mongoose rejecting partial updates
 router.put("/:id", async (req, res) => {
   try {
     const updated = await Result.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: false,
     });
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);

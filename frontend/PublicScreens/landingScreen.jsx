@@ -1,29 +1,45 @@
 // src/pages/LandingScreen.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../src/index.css";
-import logo from "/bont-logo.png"; // Make sure Webpack/Vite can import this
+import { warmServer } from "../api";
+import logo from "/bont-logo.png";
 
 export default function LandingScreen() {
   const navigate = useNavigate();
 
+  // Wake the Render server the moment the user hits the landing page,
+  // before they've even pressed a button.
+  useEffect(() => {
+    warmServer();
+  }, []);
+
   return (
-    <div className="container">
-      <img src={logo} alt="Bont RFC Logo" className="logo" />
+    <div className="landing">
+      <img src={logo} alt="Bont RFC" className="landing__logo" />
 
-      <h1 className="title">🏉 Bont RFC U14's</h1>
-      <h2 className="subheading">2025/26 Season</h2>
+      <h1 className="landing__club">Bont RFC</h1>
+      <p className="landing__team">U14's</p>
+      <p className="landing__season">2025 / 2026 Season</p>
 
-      <button className="button primary" onClick={() => navigate("/fixtures")}>
-        View Fixtures
-      </button>
-      <button className="button primary" onClick={() => navigate("/results")}>
-        View Results
-      </button>
+      <div className="landing__divider" />
 
-      <button className="button primary" onClick={() => navigate("/login")}>
-        Admin Login
-      </button>
+      <nav className="landing__nav">
+        <button
+          className="btn btn--primary"
+          onClick={() => navigate("/fixtures")}
+        >
+          🏉 Fixtures
+        </button>
+        <button
+          className="btn btn--outline"
+          onClick={() => navigate("/results")}
+        >
+          📋 Results
+        </button>
+        <button className="btn btn--ghost" onClick={() => navigate("/login")}>
+          Admin Login
+        </button>
+      </nav>
     </div>
   );
 }

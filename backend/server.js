@@ -2,9 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-
 import fixtureRoutes from "./routes/fixtures.js";
 import resultRoutes from "./routes/results.js";
+import archiveRoutes from "./routes/archives.js";
 
 dotenv.config();
 const app = express();
@@ -20,7 +20,7 @@ app.use(
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -34,6 +34,7 @@ mongoose
 // API routes
 app.use("/api/fixtures", fixtureRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/archives", archiveRoutes);
 
 // Test route
 app.get("/", (req, res) => {

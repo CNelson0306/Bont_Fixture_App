@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import "./index.css";
 
 // Pages
@@ -13,8 +14,13 @@ import ManageFixtureScreen from "../AdminScreens/manageFixtureScreen";
 import ManageResultScreen from "../AdminScreens/manageResultScreen";
 import EditFixtures from "../AdminScreens/editFixtureScreen";
 import EditResults from "../AdminScreens/editResultScreen";
+import Standings from "../AdminScreens/overallTable";
+import { warmServer } from "../api";
 
 function App() {
+  useEffect(() => {
+    warmServer();
+  }, []);
   return (
     <Router>
       <Routes>
@@ -29,6 +35,7 @@ function App() {
         <Route path="/manage-results" element={<ManageResultScreen />} />
         <Route path="/edit-fixtures/:fixtureId" element={<EditFixtures />} />
         <Route path="/edit-results/:resultId" element={<EditResults />} />
+        <Route path="standings" element={<Standings />} />
 
         {/* PUBLIC ROUTES */}
         <Route path="/fixtures" element={<FixtureScreen />} />

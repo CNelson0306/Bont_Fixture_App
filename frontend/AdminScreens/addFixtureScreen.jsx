@@ -1,8 +1,23 @@
+// src/pages/AddFixtureScreen.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addFixture } from "../api";
 import localforage from "localforage";
-import "../src/index.css";
+
+const formatDate = (isoDate) => {
+  if (!isoDate) return "";
+  const [year, month, day] = isoDate.split("-");
+  return `${day}/${month}/${year.slice(-2)}`;
+};
+
+const sortFixtures = (fixtures) =>
+  [...fixtures].sort((a, b) => {
+    const parse = (d) => {
+      const [day, month, year] = d.split("/").map(Number);
+      return new Date(2000 + year, month - 1, day);
+    };
+    return parse(a.date) - parse(b.date);
+  });
 
 export default function AddFixtureScreen() {
   const navigate = useNavigate();
@@ -11,110 +26,137 @@ export default function AddFixtureScreen() {
   const [awayTeam, setAwayTeam] = useState("");
   const [venue, setVenue] = useState("");
   const [date, setDate] = useState("");
-
-  // Helper to format YYYY-MM-DD -> dd/mm/yy
-  const formatDate = (isoDate) => {
-    if (!isoDate) return "Date not available";
-    const [year, month, day] = isoDate.split("-");
-    return `${day}/${month}/${year.slice(-2)}`;
-  };
-
-  // Helper to sort fixtures by date
-  const sortFixtures = (fixtures) =>
-    fixtures.sort((a, b) => {
-      const [dayA, monthA, yearA] = a.date.split("/").map(Number);
-      const [dayB, monthB, yearB] = b.date.split("/").map(Number);
-      return (
-        new Date(2000 + yearA, monthA - 1, dayA) -
-        new Date(2000 + yearB, monthB - 1, dayB)
-      );
-    });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleSave = async () => {
-    if (!homeTeam || !awayTeam || !venue || !date) {
-      alert("All fields (including Date) are required!");
+    setError("");
+    if (!homeTeam.trim() || !awayTeam.trim() || !venue.trim() || !date) {
+      setError("All fields are required.");
       return;
     }
 
-    const formattedDate = formatDate(date);
-
+    setSaving(true);
     const fixturePayload = {
-      home: homeTeam,
-      away: awayTeam,
-      venue,
-      date: formattedDate,
+      home: homeTeam.trim(),
+      away: awayTeam.trim(),
+      venue: venue.trim(),
+      date: formatDate(date),
     };
 
     try {
       const response = await addFixture(fixturePayload);
-
       if (response) {
-        alert("Fixture saved!");
-
-        // 1️⃣ Update offline cache immediately
         const cached = (await localforage.getItem("fixtures")) || [];
-        const updatedFixtures = sortFixtures([...cached, fixturePayload]);
-        await localforage.setItem("fixtures", updatedFixtures);
+        await localforage.setItem(
+          "fixtures",
+          sortFixtures([...cached, fixturePayload]),
+        );
 
-        // 2️⃣ Reset form
-        setHomeTeam("");
-        setAwayTeam("");
-        setVenue("");
-        setDate("");
-
-        // Optional: navigate back to FixtureScreen
-        navigate(-1);
+        setSaved(true);
+        setTimeout(() => navigate(-1), 900);
       } else {
-        alert("Error: Could not save fixture.");
+        setError("Could not save fixture. Please try again.");
       }
     } catch (err) {
       console.error("Error saving fixture:", err);
-      alert("Error saving fixture. Try again.");
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="container">
-      <h1 className="title">Add Fixture</h1>
+    <div className="page">
+      <header className="page__header">
+        <button className="page__back" onClick={() => navigate(-1)}>
+          Back
+        </button>
+        <h1 className="page__title">Add Fixture</h1>
+        <div className="page__title-spacer" />
+      </header>
 
-      {/* Date Picker */}
-      <input
-        type="date"
-        className="input"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+      <div className="form__body">
+        <div className="form__card">
+          <div className="form__field">
+            <label className="form__label" htmlFor="date">
+              Date
+            </label>
+            <input
+              id="date"
+              className="input"
+              type="date"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                setError("");
+              }}
+            />
+          </div>
 
-      {/* Inputs */}
-      <input
-        className="input"
-        type="text"
-        placeholder="Home Team"
-        value={homeTeam}
-        onChange={(e) => setHomeTeam(e.target.value)}
-      />
-      <input
-        className="input"
-        type="text"
-        placeholder="Away Team"
-        value={awayTeam}
-        onChange={(e) => setAwayTeam(e.target.value)}
-      />
-      <input
-        className="input"
-        type="text"
-        placeholder="Venue"
-        value={venue}
-        onChange={(e) => setVenue(e.target.value)}
-      />
+          <div className="form__field">
+            <label className="form__label" htmlFor="home">
+              Home Team
+            </label>
+            <input
+              id="home"
+              className="input"
+              type="text"
+              placeholder="e.g. Bont RFC"
+              value={homeTeam}
+              onChange={(e) => {
+                setHomeTeam(e.target.value);
+                setError("");
+              }}
+            />
+          </div>
 
-      {/* Buttons */}
-      <button className="button primary" onClick={handleSave}>
-        Save Fixture
-      </button>
-      <button className="button secondary" onClick={() => navigate(-1)}>
-        Back
-      </button>
+          <div className="form__field">
+            <label className="form__label" htmlFor="away">
+              Away Team
+            </label>
+            <input
+              id="away"
+              className="input"
+              type="text"
+              placeholder="e.g. Neath RFC"
+              value={awayTeam}
+              onChange={(e) => {
+                setAwayTeam(e.target.value);
+                setError("");
+              }}
+            />
+          </div>
+
+          <div className="form__field">
+            <label className="form__label" htmlFor="venue">
+              Venue
+            </label>
+            <input
+              id="venue"
+              className="input"
+              type="text"
+              placeholder="e.g. Home"
+              value={venue}
+              onChange={(e) => {
+                setVenue(e.target.value);
+                setError("");
+              }}
+            />
+          </div>
+
+          {error && <p className="form__error">{error}</p>}
+
+          <button
+            className={`btn btn--primary form__submit ${saved ? "form__submit--saved" : ""}`}
+            onClick={handleSave}
+            disabled={saving || saved}
+          >
+            {saved ? "✓ Saved!" : saving ? "Saving…" : "Save Fixture"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
