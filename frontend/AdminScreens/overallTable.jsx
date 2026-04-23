@@ -195,8 +195,7 @@ export default function OverallTable() {
               <div className="standings__archive-box">
                 <p className="standings__archive-title">Archive This Season</p>
                 <p className="standings__archive-hint">
-                  Saves a snapshot of current standings to the backend for
-                  future reference.
+                  Saves a snapshot of standings for future reference.
                 </p>
                 <div className="form__field">
                   <label className="form__label" htmlFor="season-label">
