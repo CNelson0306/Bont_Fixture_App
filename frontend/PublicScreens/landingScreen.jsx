@@ -1,17 +1,21 @@
 // src/pages/LandingScreen.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { warmServer } from "../api";
+import { warmAndPrefetch, getFixtures, getResults } from "../api";
 import logo from "/bont-logo.png";
 
 export default function LandingScreen() {
   const navigate = useNavigate();
 
-  // Wake the Render server the moment the user hits the landing page,
-  // before they've even pressed a button.
+  // Fire prefetch the moment the landing screen mounts
   useEffect(() => {
-    warmServer();
+    warmAndPrefetch();
   }, []);
+
+  // onTouchStart fires ~100ms before onClick — gives a head start
+  // on the navigation + data fetch before the user's finger lifts
+  const prefetchFixtures = () => getFixtures().catch(() => {});
+  const prefetchResults = () => getResults().catch(() => {});
 
   return (
     <div className="landing">
@@ -19,19 +23,23 @@ export default function LandingScreen() {
 
       <h1 className="landing__club">Bont RFC</h1>
       <p className="landing__team">U14's</p>
-      <p className="landing__season">2025 / 2026 Season</p>
+      <p className="landing__season">2025 / 26 Season</p>
 
       <div className="landing__divider" />
 
       <nav className="landing__nav">
         <button
           className="btn btn--primary"
+          onTouchStart={prefetchFixtures}
+          onMouseEnter={prefetchFixtures}
           onClick={() => navigate("/fixtures")}
         >
           🏉 Fixtures
         </button>
         <button
           className="btn btn--outline"
+          onTouchStart={prefetchResults}
+          onMouseEnter={prefetchResults}
           onClick={() => navigate("/results")}
         >
           📋 Results

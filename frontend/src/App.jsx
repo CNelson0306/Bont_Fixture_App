@@ -15,12 +15,13 @@ import ManageResultScreen from "../AdminScreens/manageResultScreen";
 import EditFixtures from "../AdminScreens/editFixtureScreen";
 import EditResults from "../AdminScreens/editResultScreen";
 import Standings from "../AdminScreens/overallTable";
-import { warmServer } from "../api";
+import { warmAndPrefetch } from "../api";
 
 function App() {
   useEffect(() => {
-    warmServer();
+    warmAndPrefetch();
   }, []);
+
   return (
     <Router>
       <Routes>

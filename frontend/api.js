@@ -1,23 +1,79 @@
 const BASE_URL = "https://bont-fixture-app.onrender.com/api";
 
-// Silently wake up the Render server as early as possible.
-export const warmServer = () => {
-  if (!navigator.onLine) return;
-  fetch(`${BASE_URL}/fixtures`, { method: "HEAD" }).catch(() => {});
+// How long cached data is considered "fresh" (5 minutes)
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+// ─── Internal cache store (in-memory, survives navigation within session) ──
+const memCache = {};
+
+const isFresh = (key) => {
+  const entry = memCache[key];
+  if (!entry) return false;
+  return Date.now() - entry.ts < CACHE_TTL_MS;
 };
 
-// Fetch fixtures AND results in one round-trip.
+const setMem = (key, data) => {
+  memCache[key] = { data, ts: Date.now() };
+};
+
+const getMem = (key) => memCache[key]?.data ?? null;
+
+// ─── Wake + prefetch ────────────────────────────────────────────
+// Call this as early as possible (App.jsx mount).
+// Fires fixtures + results in parallel so both are warm in memory
+// before the user navigates anywhere.
+export const warmAndPrefetch = () => {
+  if (!navigator.onLine) return;
+  // Fire and forget — populates memCache silently
+  Promise.all([
+    _fetchAndCache(`${BASE_URL}/fixtures`, "fixtures"),
+    _fetchAndCache(`${BASE_URL}/results`, "results"),
+  ]).catch(() => {});
+};
+
+// Kept for backwards compat
+export const warmServer = warmAndPrefetch;
+
+// ─── Shared fetch helper ────────────────────────────────────────
+const _fetchAndCache = async (url, key) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch ${key}`);
+  const data = await res.json();
+  setMem(key, data);
+  return data;
+};
+
+// ─── Smart fetch: return memory cache instantly if fresh,
+//     otherwise hit network (and update cache for next time) ─────
+const smartFetch = async (url, key) => {
+  if (isFresh(key)) {
+    return getMem(key);
+  }
+  try {
+    return await _fetchAndCache(url, key);
+  } catch (err) {
+    // Network failed — return stale cache rather than nothing
+    const stale = getMem(key);
+    if (stale) return stale;
+    throw err;
+  }
+};
+
+// Fetch fixtures AND results in a single parallel round-trip
 export const getAllData = async () => {
   const [fixtures, results] = await Promise.all([getFixtures(), getResults()]);
   return { fixtures, results };
 };
 
+// ─── Invalidate cache after a write so next read is fresh ───────
+const invalidate = (key) => {
+  delete memCache[key];
+};
+
 // ----------------- FIXTURES -----------------
 export const getFixtures = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/fixtures`);
-    if (!res.ok) throw new Error("Failed to fetch fixtures");
-    return await res.json();
+    return await smartFetch(`${BASE_URL}/fixtures`, "fixtures");
   } catch (error) {
     console.error("getFixtures error:", error);
     return [];
@@ -43,6 +99,7 @@ export const addFixture = async (fixture) => {
       body: JSON.stringify(fixture),
     });
     if (!res.ok) throw new Error("Failed to add fixture");
+    invalidate("fixtures");
     return await res.json();
   } catch (error) {
     console.error("addFixture error:", error);
@@ -58,6 +115,7 @@ export const updateFixture = async (id, fixture) => {
       body: JSON.stringify(fixture),
     });
     if (!res.ok) throw new Error("Failed to update fixture");
+    invalidate("fixtures");
     return await res.json();
   } catch (error) {
     console.error("updateFixture error:", error);
@@ -69,6 +127,7 @@ export const deleteFixture = async (id) => {
   try {
     const res = await fetch(`${BASE_URL}/fixtures/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete fixture");
+    invalidate("fixtures");
     return await res.json();
   } catch (error) {
     console.error("deleteFixture error:", error);
@@ -79,9 +138,7 @@ export const deleteFixture = async (id) => {
 // ----------------- RESULTS -----------------
 export const getResults = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/results`);
-    if (!res.ok) throw new Error("Failed to fetch results");
-    return await res.json();
+    return await smartFetch(`${BASE_URL}/results`, "results");
   } catch (error) {
     console.error("getResults error:", error);
     return [];
@@ -107,6 +164,7 @@ export const addResult = async (result) => {
       body: JSON.stringify(result),
     });
     if (!res.ok) throw new Error("Failed to add result");
+    invalidate("results");
     return await res.json();
   } catch (error) {
     console.error("addResult error:", error);
@@ -122,6 +180,7 @@ export const updateResult = async (id, result) => {
       body: JSON.stringify(result),
     });
     if (!res.ok) throw new Error("Failed to update result");
+    invalidate("results");
     return await res.json();
   } catch (error) {
     console.error("updateResult error:", error);
@@ -133,6 +192,7 @@ export const deleteResult = async (id) => {
   try {
     const res = await fetch(`${BASE_URL}/results/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete result");
+    invalidate("results");
     return await res.json();
   } catch (error) {
     console.error("deleteResult error:", error);
@@ -143,9 +203,7 @@ export const deleteResult = async (id) => {
 // ----------------- ARCHIVES -----------------
 export const getArchives = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/archives`);
-    if (!res.ok) throw new Error("Failed to fetch archives");
-    return await res.json();
+    return await smartFetch(`${BASE_URL}/archives`, "archives");
   } catch (error) {
     console.error("getArchives error:", error);
     return [];
@@ -160,6 +218,7 @@ export const saveArchive = async (archive) => {
       body: JSON.stringify(archive),
     });
     if (!res.ok) throw new Error("Failed to save archive");
+    invalidate("archives");
     return await res.json();
   } catch (error) {
     console.error("saveArchive error:", error);
@@ -171,6 +230,7 @@ export const deleteArchive = async (id) => {
   try {
     const res = await fetch(`${BASE_URL}/archives/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete archive");
+    invalidate("archives");
     return await res.json();
   } catch (error) {
     console.error("deleteArchive error:", error);

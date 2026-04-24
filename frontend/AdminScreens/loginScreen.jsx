@@ -11,7 +11,10 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     setError("");
-    if (username === "admin" && password === "password") {
+
+    const adminUsername = import.meta.env.VITE_ADMIN_USERNAME;
+    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+    if (username === adminUsername && password === adminPassword) {
       navigate("/admin-home-screen");
     } else {
       setError("Invalid username or password.");
