@@ -1,7 +1,8 @@
 // src/pages/StandingsScreen.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getResults, saveArchive, getArchives } from "../api";
+import localforage from "localforage";
+import { getResults, saveArchive, getArchives, clearSeason } from "../api";
 
 // ─── Build standings from results array ────────────────────────
 const buildStandings = (results) => {
@@ -11,8 +12,7 @@ const buildStandings = (results) => {
     // Points scorers
     for (const scorer of result.scorers || []) {
       if (!scorer.name) continue;
-      if (!map[scorer.name])
-        map[scorer.name] = { name: scorer.name, points: 0, mom: 0 };
+      if (!map[scorer.name]) map[scorer.name] = { name: scorer.name, points: 0, mom: 0 };
       map[scorer.name].points += Number(scorer.points) || 0;
     }
     // Man of the Match — normalise to array (old data may be a string)
@@ -35,21 +35,21 @@ const buildStandings = (results) => {
 
 const TABS = ["Standings", "Archives"];
 
-export default function OverallTable() {
+export default function StandingsScreen() {
   const navigate = useNavigate();
 
-  const [tab, setTab] = useState("Standings");
-  const [standings, setStandings] = useState([]);
-  const [archives, setArchives] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [archLoading, setArchLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [tab,          setTab]          = useState("Standings");
+  const [standings,    setStandings]    = useState([]);
+  const [archives,     setArchives]     = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [archLoading,  setArchLoading]  = useState(false);
+  const [error,        setError]        = useState("");
 
   // archive form
-  const [seasonLabel, setSeasonLabel] = useState("");
-  const [archiving, setArchiving] = useState(false);
-  const [confirmReset, setConfirmReset] = useState(false);
-  const [archiveSaved, setArchiveSaved] = useState(false);
+  const [seasonLabel,   setSeasonLabel]   = useState("");
+  const [archiving,     setArchiving]     = useState(false);
+  const [confirmReset,  setConfirmReset]  = useState(false);
+  const [archiveSaved,  setArchiveSaved]  = useState(false);
 
   // expanded archive row
   const [expandedArch, setExpandedArch] = useState(null);
@@ -102,18 +102,29 @@ export default function OverallTable() {
     }
     setArchiving(true);
     try {
+      // 1. Save the archive snapshot
       await saveArchive({
-        season: seasonLabel.trim(),
+        season:    seasonLabel.trim(),
         standings: standings,
         createdAt: new Date().toISOString(),
       });
+
+      // 2. Clear all fixtures and results from backend + local cache
+      await clearSeason();
+      await Promise.all([
+        localforage.removeItem("fixtures"),
+        localforage.removeItem("results"),
+      ]);
+
+      // 3. Reset local standings display
+      setStandings([]);
       setArchiveSaved(true);
       setConfirmReset(false);
       setSeasonLabel("");
       setTimeout(() => setArchiveSaved(false), 3000);
     } catch (err) {
       console.error(err);
-      setError("Failed to save archive. Please try again.");
+      setError("Failed to archive season. Please try again.");
     } finally {
       setArchiving(false);
     }
@@ -122,9 +133,7 @@ export default function OverallTable() {
   return (
     <div className="page">
       <header className="page__header">
-        <button className="page__back" onClick={() => navigate(-1)}>
-          Back
-        </button>
+        <button className="page__back" onClick={() => navigate(-1)}>Back</button>
         <h1 className="page__title">Standings</h1>
         <div className="page__title-spacer" />
       </header>
@@ -135,10 +144,7 @@ export default function OverallTable() {
           <button
             key={t}
             className={`standings__tab ${tab === t ? "standings__tab--active" : ""}`}
-            onClick={() => {
-              setTab(t);
-              setError("");
-            }}
+            onClick={() => { setTab(t); setError(""); }}
           >
             {t}
           </button>
@@ -151,18 +157,11 @@ export default function OverallTable() {
           {loading ? (
             <div className="loading-pulse">
               {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="skeleton skeleton--card"
-                  style={{ height: 52 }}
-                />
+                <div key={i} className="skeleton skeleton--card" style={{ height: 52 }} />
               ))}
             </div>
           ) : standings.length === 0 ? (
-            <p className="state-message">
-              No results recorded yet — standings will appear once results are
-              added.
-            </p>
+            <p className="state-message">No results recorded yet — standings will appear once results are added.</p>
           ) : (
             <>
               {/* Table header */}
@@ -174,10 +173,7 @@ export default function OverallTable() {
               </div>
 
               {standings.map((player, index) => (
-                <div
-                  key={player.name}
-                  className={`standings__row ${index === 0 ? "standings__row--top" : ""}`}
-                >
+                <div key={player.name} className={`standings__row ${index === 0 ? "standings__row--top" : ""}`}>
                   <span className="standings__col-rank">
                     {index === 0 ? "🏆" : index + 1}
                   </span>
@@ -195,32 +191,24 @@ export default function OverallTable() {
               <div className="standings__archive-box">
                 <p className="standings__archive-title">Archive This Season</p>
                 <p className="standings__archive-hint">
-                  Saves a snapshot of standings for future reference.
+                  Saves a snapshot of current standings to the backend for future reference.
                 </p>
                 <div className="form__field">
-                  <label className="form__label" htmlFor="season-label">
-                    Season Label
-                  </label>
+                  <label className="form__label" htmlFor="season-label">Season Label</label>
                   <input
                     id="season-label"
                     className="input"
                     type="text"
                     placeholder="e.g. 2024/25"
                     value={seasonLabel}
-                    onChange={(e) => {
-                      setSeasonLabel(e.target.value);
-                      setError("");
-                      setConfirmReset(false);
-                    }}
+                    onChange={(e) => { setSeasonLabel(e.target.value); setError(""); setConfirmReset(false); }}
                   />
                 </div>
 
                 {error && <p className="form__error">{error}</p>}
 
                 {archiveSaved && (
-                  <p className="standings__archive-success">
-                    ✓ Season archived successfully!
-                  </p>
+                  <p className="standings__archive-success">✓ Season archived successfully!</p>
                 )}
 
                 <button
@@ -231,8 +219,8 @@ export default function OverallTable() {
                   {archiving
                     ? "Archiving…"
                     : confirmReset
-                      ? "⚠️ Confirm — this cannot be undone"
-                      : "Archive Season"}
+                    ? "⚠️ Confirm — this cannot be undone"
+                    : "Archive Season"}
                 </button>
               </div>
             </>
@@ -246,11 +234,7 @@ export default function OverallTable() {
           {archLoading ? (
             <div className="loading-pulse">
               {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className="skeleton skeleton--card"
-                  style={{ height: 64 }}
-                />
+                <div key={i} className="skeleton skeleton--card" style={{ height: 64 }} />
               ))}
             </div>
           ) : archives.length === 0 ? (
@@ -264,9 +248,7 @@ export default function OverallTable() {
                   <button
                     className="archive__card-header"
                     onClick={() =>
-                      setExpandedArch(
-                        expandedArch === arch._id ? null : arch._id,
-                      )
+                      setExpandedArch(expandedArch === arch._id ? null : arch._id)
                     }
                   >
                     <span className="archive__season">{arch.season}</span>
@@ -274,9 +256,7 @@ export default function OverallTable() {
                       {arch.standings?.length ?? 0} players ·{" "}
                       {arch.createdAt
                         ? new Date(arch.createdAt).toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
+                            day: "2-digit", month: "short", year: "numeric",
                           })
                         : ""}
                     </span>
@@ -294,20 +274,13 @@ export default function OverallTable() {
                         <span className="standings__col-stat">MoM</span>
                       </div>
                       {(arch.standings || []).map((p, i) => (
-                        <div
-                          key={p.name}
-                          className={`standings__row ${i === 0 ? "standings__row--top" : ""}`}
-                        >
+                        <div key={p.name} className={`standings__row ${i === 0 ? "standings__row--top" : ""}`}>
                           <span className="standings__col-rank">
                             {i === 0 ? "🏆" : i + 1}
                           </span>
                           <span className="standings__col-name">{p.name}</span>
-                          <span className="standings__col-stat standings__col-stat--pts">
-                            {p.points}
-                          </span>
-                          <span className="standings__col-stat">
-                            {p.mom > 0 ? `${p.mom}x` : "—"}
-                          </span>
+                          <span className="standings__col-stat standings__col-stat--pts">{p.points}</span>
+                          <span className="standings__col-stat">{p.mom > 0 ? `${p.mom}x` : "—"}</span>
                         </div>
                       ))}
                     </div>

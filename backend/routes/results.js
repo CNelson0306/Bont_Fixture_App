@@ -36,13 +36,14 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT — runValidators: false prevents Mongoose rejecting partial updates
+// PUT
 router.put("/:id", async (req, res) => {
   try {
-    const updated = await Result.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: false,
-    });
+    const updated = await Result.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: false }
+    );
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
   } catch (err) {
@@ -50,12 +51,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE
+// DELETE one
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Result.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: "Not found" });
     res.json(deleted);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE all — used when archiving a season
+router.delete("/", async (req, res) => {
+  try {
+    await Result.deleteMany({});
+    res.json({ message: "All results deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

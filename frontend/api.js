@@ -27,7 +27,7 @@ export const warmAndPrefetch = () => {
   // Fire and forget — populates memCache silently
   Promise.all([
     _fetchAndCache(`${BASE_URL}/fixtures`, "fixtures"),
-    _fetchAndCache(`${BASE_URL}/results`, "results"),
+    _fetchAndCache(`${BASE_URL}/results`,  "results"),
   ]).catch(() => {});
 };
 
@@ -61,13 +61,29 @@ const smartFetch = async (url, key) => {
 
 // Fetch fixtures AND results in a single parallel round-trip
 export const getAllData = async () => {
-  const [fixtures, results] = await Promise.all([getFixtures(), getResults()]);
+  const [fixtures, results] = await Promise.all([
+    getFixtures(),
+    getResults(),
+  ]);
   return { fixtures, results };
 };
 
 // ─── Invalidate cache after a write so next read is fresh ───────
-const invalidate = (key) => {
-  delete memCache[key];
+const invalidate = (key) => { delete memCache[key]; };
+
+// ----------------- SEASON RESET -----------------
+// Deletes all fixtures and results from the backend.
+// Called after a season has been successfully archived.
+export const clearSeason = async () => {
+  const [fixturesRes, resultsRes] = await Promise.all([
+    fetch(`${BASE_URL}/fixtures`, { method: "DELETE" }),
+    fetch(`${BASE_URL}/results`,  { method: "DELETE" }),
+  ]);
+  if (!fixturesRes.ok) throw new Error("Failed to clear fixtures");
+  if (!resultsRes.ok)  throw new Error("Failed to clear results");
+  // Invalidate all relevant caches
+  invalidate("fixtures");
+  invalidate("results");
 };
 
 // ----------------- FIXTURES -----------------

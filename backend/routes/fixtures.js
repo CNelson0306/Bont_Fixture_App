@@ -1,3 +1,4 @@
+// src/backend/routes/fixtures.js
 import express from "express";
 import Fixture from "../models/Fixture.js";
 
@@ -48,12 +49,22 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE
+// DELETE one
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Fixture.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: "Not found" });
     res.json(deleted);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE all — used when archiving a season
+router.delete("/", async (req, res) => {
+  try {
+    await Fixture.deleteMany({});
+    res.json({ message: "All fixtures deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
