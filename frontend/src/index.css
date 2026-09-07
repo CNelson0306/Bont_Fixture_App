@@ -526,6 +526,85 @@ textarea {
   color: var(--amber);
 }
 
+/* ─── SEASON RECORD BAR ───────────────────────────────────────── */
+.record__bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.record__pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  gap: 0.15rem;
+}
+
+.record__pill-num {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.record__pill-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.record__pill--played {
+  background: var(--surface);
+  border-color: var(--border-solid);
+}
+.record__pill--played .record__pill-num {
+  color: var(--text);
+}
+.record__pill--played .record__pill-label {
+  color: var(--text-muted);
+}
+
+.record__pill--win {
+  background: rgba(74, 200, 100, 0.08);
+  border-color: rgba(74, 200, 100, 0.25);
+}
+.record__pill--win .record__pill-num {
+  color: #4ac864;
+}
+.record__pill--win .record__pill-label {
+  color: #4ac864;
+  opacity: 0.8;
+}
+
+.record__pill--draw {
+  background: rgba(138, 138, 138, 0.08);
+  border-color: rgba(138, 138, 138, 0.2);
+}
+.record__pill--draw .record__pill-num {
+  color: var(--text-muted);
+}
+.record__pill--draw .record__pill-label {
+  color: var(--text-muted);
+}
+
+.record__pill--loss {
+  background: rgba(232, 64, 64, 0.08);
+  border-color: rgba(232, 64, 64, 0.2);
+}
+.record__pill--loss .record__pill-num {
+  color: var(--red);
+}
+.record__pill--loss .record__pill-label {
+  color: var(--red);
+  opacity: 0.8;
+}
+
 /* ─── FORM / INPUT ────────────────────────────────────────────── */
 .input {
   background: var(--surface);
