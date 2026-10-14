@@ -22,8 +22,8 @@ export default function LandingScreen() {
       <img src={logo} alt="Bont RFC" className="landing__logo" />
 
       <h1 className="landing__club">Bont RFC</h1>
-      <p className="landing__team">U14's</p>
-      <p className="landing__season">2025 / 26 Season</p>
+      <p className="landing__team">U15's</p>
+      <p className="landing__season">2026 / 27 Season</p>
 
       <div className="landing__divider" />
 
